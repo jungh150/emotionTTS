@@ -8,7 +8,7 @@ from preprocess import MelSpectrogramDataset, collate_fn  # CSV 기반 데이터
 from emotionTTS import EmotionTTS  # 모델 임포트
 
 # CSV 파일 경로 설정
-CSV_PATH = "dataset/emotion_melpath_dataset.csv"
+CSV_PATH = "datasets/emotion_melpath_dataset_updated.csv"
 # CSV 구조: [Mel Spectrum .npy 파일 경로, 감정 레이블]
 
 # 데이터셋 및 DataLoader 준비
