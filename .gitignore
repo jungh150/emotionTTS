@@ -12,7 +12,7 @@ env.bak/
 venv.bak/
 
 # 데이터셋 폴더
-dataset/
+datasets/
 
 # 모델 파일
 models/
