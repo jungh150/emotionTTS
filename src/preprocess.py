@@ -1,45 +1,30 @@
 import librosa
 import numpy as np
 import os
-import torch
-from torch.utils.data import Dataset
+import pandas as pd
 
-class AudioDataset(Dataset):
-    def __init__(self, data_dir, sample_rate=22050, n_mels=128, max_len=128):
-        self.data = []
-        self.labels = []
-        self.sr = sample_rate
-        self.n_mels = n_mels
-        self.max_len = max_len
+# CSV 파일 경로
+csv_path = "datasets/emotion_melpath_dataset.csv"
 
-        # 감정별 오디오 파일 로드
-        emotions = {'angry': 0, 'happy': 1, 'sad': 2, 'neutral': 3}
-        for emotion, label in emotions.items():
-            folder_path = os.path.join(data_dir, emotion)
-            for file in os.listdir(folder_path):
-                file_path = os.path.join(folder_path, file)
-                self.data.append(file_path)
-                self.labels.append(label)
+# Mel Spectrum 저장 경로
+output_dir = "datasets/melspecs/"
+os.makedirs(output_dir, exist_ok=True)  # 저장 디렉토리 생성
 
-    def __len__(self):
-        return len(self.data)
+# CSV 파일 읽기
+df = pd.read_csv(csv_path)
 
-    def __getitem__(self, idx):
-        file_path = self.data[idx]
-        label = self.labels[idx]
+for _, row in df.iterrows():
+    wav_path = row['file_path']
+    output_path = os.path.join(output_dir, os.path.basename(wav_path).replace(".wav", ".npy"))
 
-        # 오디오 파일 로드
-        y, sr = librosa.load(file_path, sr=self.sr)
+    # .wav 파일에서 Mel Spectrum 추출
+    try:
+        y, sr = librosa.load(wav_path, sr=22050)
+        mel_spec = librosa.feature.melspectrogram(y=y, sr=sr, n_mels=128)
+        mel_spec_db = librosa.power_to_db(mel_spec, ref=np.max)
 
-        # Mel Spectrum 추출
-        mel = librosa.feature.melspectrogram(y=y, sr=sr, n_mels=self.n_mels)
-        mel_db = librosa.power_to_db(mel, ref=np.max)
-
-        # 패딩/트리밍
-        if mel_db.shape[1] > self.max_len:
-            mel_db = mel_db[:, :self.max_len]
-        else:
-            pad_width = self.max_len - mel_db.shape[1]
-            mel_db = np.pad(mel_db, ((0, 0), (0, pad_width)), mode='constant')
-
-        return torch.tensor(mel_db, dtype=torch.float32), label
+        # Mel Spectrum 저장
+        np.save(output_path, mel_spec_db)
+        print(f"Saved: {output_path}")
+    except Exception as e:
+        print(f"Error processing {wav_path}: {e}")
