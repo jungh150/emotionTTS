@@ -15,10 +15,12 @@ def generate_mel_spectrograms(csv_path, output_dir):
         output_path = os.path.join(output_dir, os.path.basename(wav_path).replace(".wav", ".npy"))
 
         try:
+            # 오디오 파일 로드 및 Mel Spectrum 생성
             y, sr = librosa.load(wav_path, sr=22050)
             mel_spec = librosa.feature.melspectrogram(y=y, sr=sr, n_mels=128)
             mel_spec_db = librosa.power_to_db(mel_spec, ref=np.max)
 
+            # .npy 파일로 저장
             np.save(output_path, mel_spec_db)
             print(f"Saved: {output_path}")
         except Exception as e:
@@ -55,7 +57,7 @@ def collate_fn(batch):
 
     return mel_spectrograms_padded, torch.stack(labels), masks_padded
 
-# 실행 코드 추가
+# 실행 코드
 if __name__ == "__main__":
     csv_path = "datasets/emotion_melpath_dataset.csv"
     output_dir = "datasets/melspecs/"
