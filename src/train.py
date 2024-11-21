@@ -32,7 +32,7 @@ criterion = nn.MSELoss()  # Mel Spectrum의 차이를 최소화
 optimizer = optim.Adam(model.parameters(), lr=0.0001)  # 학습률을 낮게 설정하여 안정적 학습
 
 # 훈련 루프
-epochs = 20
+epochs = 30
 for epoch in range(epochs):
     model.train()
     total_train_loss = 0
